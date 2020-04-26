@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-1 -*-
 """Binary tree with decision tree semantics and ASCII visualization."""
 
 
