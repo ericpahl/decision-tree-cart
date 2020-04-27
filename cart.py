@@ -10,12 +10,25 @@ class DecisionTreeClassifier:
 
     def fit(self, X, y):
         """Build decision tree classifier."""
-        # change class type to integers 0 to n-1
-        self.distinct_classes = np.unique(y)
-        for i in range(len(self.distinct_classes)):
-            y = np.where(y == self.distinct_classes[i], i,y)
         self.n_classes_ = len(set(y))  # classes are assumed to go from 0 to n-1
         self.n_features_ = X.shape[1]
+        
+        """Convert outcome vector to desired format"""
+        # change class type to integers 0 to n-1
+        self.distinct_classes = np.unique(y)
+        for i in range(self.n_classes_):
+            y = np.where(y == self.distinct_classes[i], i,y)
+            
+        """ Change categories to one-hot encoding values, create dummy variables
+        only works for categories with type str and two levels """
+        for i in range(self.n_features_):
+            var = X[:,i]
+            if type(var[1]) == str: # cat must be type str
+                cats = np.unique(var)
+                if len(cats) == 2: # cat must be two levels
+                    X[:,i] = np.where(var == cats[1],0,1)
+        
+        """ Grow Tree """
         self.tree_ = self._grow_tree(X, y)
 
     def predict(self, X):
