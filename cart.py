@@ -10,6 +10,10 @@ class DecisionTreeClassifier:
 
     def fit(self, X, y):
         """Build decision tree classifier."""
+        # change class type to integers 0 to n-1
+        self.distinct_classes = np.unique(y)
+        for i in range(len(self.distinct_classes)):
+            y = np.where(y == self.distinct_classes[i], i,y)
         self.n_classes_ = len(set(y))  # classes are assumed to go from 0 to n-1
         self.n_features_ = X.shape[1]
         self.tree_ = self._grow_tree(X, y)
@@ -53,7 +57,7 @@ class DecisionTreeClassifier:
             return None, None
 
         # Count of each class in the current node.
-        num_parent = [np.sum(y == c) for c in range(self.n_classes_)]
+        num_parent = [np.sum(y == c) for c in np.unique(y)]
 
         # Gini of current node.
         best_gini = 1.0 - sum((n / m) ** 2 for n in num_parent)
@@ -102,7 +106,7 @@ class DecisionTreeClassifier:
         """Build a decision tree by recursively finding the best split."""
         # Population for each class in current node. The predicted class is the one with
         # largest population.
-        num_samples_per_class = [np.sum(y == i) for i in range(self.n_classes_)]
+        num_samples_per_class = [np.sum(y == i) for i in np.unique(y)]
         predicted_class = np.argmax(num_samples_per_class)
         node = tree.Node(
             gini=self._gini(y),
