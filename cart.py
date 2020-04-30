@@ -13,12 +13,46 @@ class DecisionTreeClassifier:
         self.n_classes_ = len(set(y))  # classes are assumed to go from 0 to n-1
         self.n_features_ = X.shape[1]
         
+        # convert outcome vector to desired 0 to n-1 format
+        y = self._convert_y(y)
+            
+        # change str categories to desired 0 to n-1 format, only works with two level categories
+        X = self._convert_X(X)
+        
+        """ Grow Tree """
+        self.tree_ = self._grow_tree(X, y)
+
+    def predict(self, X):
+        """Predict class for X."""
+        X = self._convert_X(X)
+        
+        y = [self._predict(inputs) for inputs in X]
+        
+        y = self._convert_back_y(y)
+
+        return y
+
+    def debug(self, feature_names, class_names, show_details=True):
+        """Print ASCII visualization of decision tree."""
+        self.tree_.debug(feature_names, class_names, show_details)
+        
+    def _convert_y(self,y):
         """Convert outcome vector to desired format"""
         # change class type to integers 0 to n-1
         self.distinct_classes = np.unique(y)
         for i in range(self.n_classes_):
             y = np.where(y == self.distinct_classes[i], i,y)
-            
+        return y
+    
+    def _convert_back_y(self,y):
+        """an inefficient way to change outcomes classes back to original format"""
+        for i in range(len(y)):
+            for j in range(self.n_classes_):
+                if y[i] == j:
+                    y[i] = self.distinct_classes[j]
+        return y
+    
+    def _convert_X(self,X):
         """ Change categories to one-hot encoding values, create dummy variables
         only works for categories with type str and two levels """
         for i in range(self.n_features_):
@@ -27,17 +61,7 @@ class DecisionTreeClassifier:
                 cats = np.unique(var)
                 if len(cats) == 2: # cat must be two levels
                     X[:,i] = np.where(var == cats[1],0,1)
-        
-        """ Grow Tree """
-        self.tree_ = self._grow_tree(X, y)
-
-    def predict(self, X):
-        """Predict class for X."""
-        return [self._predict(inputs) for inputs in X]
-
-    def debug(self, feature_names, class_names, show_details=True):
-        """Print ASCII visualization of decision tree."""
-        self.tree_.debug(feature_names, class_names, show_details)
+        return X
 
     def _gini(self, y):
         """Compute Gini impurity of a non-empty node.
