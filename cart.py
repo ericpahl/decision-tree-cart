@@ -60,7 +60,7 @@ class DecisionTreeClassifier:
             if type(var[1]) == str: # cat must be type str
                 cats = np.unique(var)
                 if len(cats) == 2: # cat must be two levels
-                    X[:,i] = np.where(var == cats[1],0,1)
+                    X[:,i] = np.where(var == cats[0],0,1)
         return X
 
     def _gini(self, y):
